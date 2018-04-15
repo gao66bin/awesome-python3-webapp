@@ -30,13 +30,6 @@ async def create_pool(loop,**kw):
         minsize = kw.get('minsize',1),
         loop = loop
     )
-async def close_pool():
-    logging.info('close database connection pool...')
-    global __pool
-    if __pool is not None:
-        __pool.close()
-        await __pool.wait_closed()
-        
 async def select(sql,args,size=None):
     log(sql,args)
     async with  __pool.acquire() as conn:
@@ -65,12 +58,11 @@ async def execute(sql,args,autocommit = True):
                 await conn.rollback()
             raise
         return affected
-def create_args_string(num):
+async def create_args_string(num):
     L = []
     for n in range(num):
         L.append('?')
-    logging.info('create args string:%s' % ', '.join(L) )
-    return ', '.join(L)
+        return ', '.join(L)
 class Field(object):
     def __init__(self,name,column_type,primary_key,default):
         self.name = name
